@@ -1,0 +1,30 @@
+<h1>Scraped Videos</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Title</th>
+      <th>Description</th>
+      <th>Views</th>
+      <th>Likes</th>
+      <th>Comments</th>
+      <th>Duration</th>
+      <th>Posted At</th>
+      <th>Days Ago</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @videos.each do |video| %>
+      <tr>
+        <td><%= video.title %></td>
+        <td><%= video.description %></td>
+        <td><%= video.view_count %></td>
+        <td><%= video.like_count %></td>
+        <td><%= video.comment_count %></td>
+        <td><%= video.duration %></td>
+        <td><%= video.posted_at %></td>
+        <td><%= video.days_ago %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

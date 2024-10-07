@@ -1,0 +1,6 @@
+<div style="text-align: center; margin-top: 50px;">
+  <%= form_with url: scrape_path, method: :post do |form| %>
+    <%= form.text_field :channel_url, placeholder: "Enter YouTube channel URL", style: "width: 400px; padding: 10px;" %>
+    <%= form.submit "Scrape Videos", style: "margin-left: 10px; padding: 10px;" %>
+  <% end %>
+</div>

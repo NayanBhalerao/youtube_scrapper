@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_09_30_070800) do
+ActiveRecord::Schema[7.1].define(version: 2024_10_04_111622) do
   create_table "videos", force: :cascade do |t|
     t.string "title"
     t.text "description"
@@ -20,6 +20,9 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_30_070800) do
     t.integer "comment_count"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "duration"
+    t.date "posted_at"
+    t.integer "days_ago"
   end
 
 end

@@ -7,6 +7,9 @@ gem "rails", "~> 7.1.3", ">= 7.1.3.2"
 
 # my gems
 gem 'yt'
+gem 'nokogiri'
+gem 'selenium-webdriver'
+
 
 # The original asset pipeline for Rails [https://github.com/rails/sprockets-rails]
 gem "sprockets-rails"
@@ -50,6 +53,7 @@ gem "bootsnap", require: false
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri mswin mswin64 mingw x64_mingw ]
+  gem "pry-byebug", platforms: %i[mri mingw x64_mingw]
 end
 
 group :development do

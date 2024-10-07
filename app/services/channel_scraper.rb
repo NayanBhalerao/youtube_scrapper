@@ -1,11 +1,33 @@
-class ChannelScraper
-    def initialize(channle_url)
-        @channel = Yt::Channel.new(url: channel_url)
-    end
+require 'nokogiri'
+require 'open-uri'
+require 'selenium-webdriver'
 
-    def scrape_videos
-        @channel.videos.each do |video|
-          VideoScraper.new(video).scrape
-        end
+class ChannelScraper
+  def initialize(channel_url)
+    @channel_url = channel_url
+  end
+
+  def scrape_videos
+    options = Selenium::WebDriver::Firefox::Options.new(args: ['--headless']) # Headless mode
+    driver = Selenium::WebDriver.for :firefox, options: options
+    driver.get(@channel_url)
+  
+    sleep(5)
+  
+    html = driver.page_source
+    doc = Nokogiri::HTML(html)
+  
+    video_links = doc.css('a[href^="/watch"]').map do |link|
+      "https://www.youtube.com#{link['href']}"
+    end.uniq
+    
+    driver.quit
+  
+    video_links.each do |video_link|
+      puts video_link
+      video_scraper = VideoScrapper.new(video_link)
+      video_scraper.scrape
     end
+  end
+  
 end
