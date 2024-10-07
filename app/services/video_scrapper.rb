@@ -46,16 +46,8 @@ class VideoScrapper
     
     date_posted_text = description_full[/\w+\s\d{1,2},\s\d{4}/]
     
-    binding.pry
     
-
-    # updating description so that we will get exact description text
-    # description = description_full.gsub(/^\d+[K]?\s+views.*?Show less/, '').strip
-    # description = description_full.gsub(/^\d+[K]?\s+views.*?Show less\s+/m, '').strip
-
     description = extract_description(description_full)
-    
-    binding.pry
     
     
     # Extract the specific posted date in formats like 'Sep 29, 2024'
@@ -80,25 +72,28 @@ class VideoScrapper
   private
 
   def extract_description(description_full)
-    # Remove view counts and timestamps at the beginning
-    description = description_full.gsub(/^\d+[K]?\s+views.*?Show less\s+/m, '').strip
-  
-    # Check for the presence of a "Show more" pattern
-    if description =~ /…more.*$/ # Matches "...more" in the description
-      # Extract the actual content before "...more"
+    # Remove the view count and any initial unwanted text
+    description = description_full.gsub(/\d+[K]?\s+views.*?Show less\s+/im, '').strip
+    
+    # Handle "more" section by using a regex that captures everything before it
+    if description =~ /…more.*$/ 
       description.gsub!(/(.*?)\.\.\.more.*$/, '\1')
     end
-  
-    # Remove any transcript section or irrelevant parts
+    
+    # Remove any transcript mentions and other unnecessary parts
     description.gsub!(/Transcript.*?Show transcript.*?(\n|$)/m, '')
     
-    # Remove credits and any unnecessary lines
-    # description.gsub!(/(Directed by|Edited by|Special Thanks to|Videos|About).*?$/, '') 
-    
-    # Normalize spaces and trim leading/trailing whitespace
+    # Clean up whitespace
     description.gsub!(/\s+/, ' ').strip!
-  
+    
+    # Extract everything after "Show less" (if present)
+    if description =~ /Show less\s+(.*)/m
+      description = $1.strip
+    end
+
+    # Return the final cleaned description
     description
   end
+  
   
 end
