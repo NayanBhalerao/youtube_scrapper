@@ -4,6 +4,7 @@
   <thead>
     <tr>
       <th>Title</th>
+      <th>URL</th>
       <th>Description</th>
       <th>Views</th>
       <th>Likes</th>
@@ -17,6 +18,7 @@
     <% @videos.each do |video| %>
       <tr>
         <td><%= video.title %></td>
+        <td><%= video.url %></td>
         <td><%= video.description %></td>
         <td><%= video.view_count %></td>
         <td><%= video.like_count %></td>

@@ -8,7 +8,6 @@ gem "rails", "~> 7.1.3", ">= 7.1.3.2"
 # my gems
 gem 'yt'
 gem 'nokogiri'
-gem 'selenium-webdriver'
 
 
 # The original asset pipeline for Rails [https://github.com/rails/sprockets-rails]
