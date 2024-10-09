@@ -8,20 +8,25 @@ class ChannelScraper
   end
 
   def scrape_videos
-    options = Selenium::WebDriver::Firefox::Options.new(args: ['--headless']) # Headless mode
-    driver = Selenium::WebDriver.for :firefox, options: options
-    driver.get(@channel_url)
+    # open this
+    # options = Selenium::WebDriver::Firefox::Options.new(args: ['--headless']) # Headless mode
+    # driver = Selenium::WebDriver.for :firefox, options: options
+    # driver.get(@channel_url)
   
-    sleep(5)
+    # sleep(5)
   
-    html = driver.page_source
-    doc = Nokogiri::HTML(html)
+    # html = driver.page_source
+    # doc = Nokogiri::HTML(html)
   
-    video_links = doc.css('a[href^="/watch"]').map do |link|
-      "https://www.youtube.com#{link['href']}"
-    end.uniq
+    # video_links = doc.css('a[href^="/watch"]').map do |link|
+    #   "https://www.youtube.com#{link['href']}"
+    # end.uniq
     
-    driver.quit
+    video_links = ["https://www.youtube.com/watch?v=2qOZyyEwAvg",
+      "https://www.youtube.com/watch?v=aWSb8uhYj1c",
+      "https://www.youtube.com/watch?v=55mmDIJx6GU"]
+    # open this
+    # driver.quit
   
     video_links.each do |video_link|
       puts video_link
