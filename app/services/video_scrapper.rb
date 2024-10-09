@@ -44,13 +44,16 @@ class VideoScrapper
     # getting the exact duration of the video
     duration = extract_duration(driver)
 
+    # get comments count
+    comments_count = get_comments_count(driver)
+
     # updating to database
     Video.find_or_create_by(url: @video_url) do |video|
       video.title = title
       video.description = description
       video.view_count = view_count
       video.like_count = "-"
-      video.comment_count = "-"
+      video.comment_count = comments_count
       video.duration = duration
       video.posted_at = date_posted_text
       video.days_ago = days_ago_text
@@ -122,5 +125,24 @@ class VideoScrapper
     else
       format("%02d:%02d", minutes, seconds)
     end
+  end
+
+  def get_comments_count(driver)
+    driver.manage.window.maximize
+    wait = Selenium::WebDriver::Wait.new(timeout: 10)
+    # XPaths for title and comments count
+    title_xpath = "//div[@class='style-scope ytd-video-primary-info-renderer']/h1"
+    alternative_title = "//*[@id='title']/h1"
+    comments_xpath = "//div[@id='title']//*[@id='count']//span[1]"
+    # Scroll down to load comments count
+    driver.execute_script("window.scrollBy(0, arguments[0]);", 600)
+    # Retrieve comments count
+    begin
+      v_comm_cnt = wait.until { driver.find_element(:xpath, comments_xpath).text }
+      puts "\n \n Video has #{v_comm_cnt} comments"
+    rescue Selenium::WebDriver::Error::TimeoutError
+      puts "\n \n Could not retrieve comments count"
+    end
+    v_comm_cnt.nil? ? 0 : v_comm_cnt.to_i
   end
 end
