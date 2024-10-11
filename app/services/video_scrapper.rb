@@ -47,12 +47,15 @@ class VideoScrapper
     # get comments count
     comments_count = get_comments_count(driver)
 
+    # get likes count
+    likes_count = get_likes_count(driver)
+
     # updating to database
     Video.find_or_create_by(url: @video_url) do |video|
       video.title = title
       video.description = description
       video.view_count = view_count
-      video.like_count = "-"
+      video.like_count = likes_count
       video.comment_count = comments_count
       video.duration = duration
       video.posted_at = date_posted_text
@@ -144,5 +147,36 @@ class VideoScrapper
       puts "\n \n Could not retrieve comments count"
     end
     v_comm_cnt.nil? ? 0 : v_comm_cnt.to_i
+  end
+
+  # get the likes count
+  def get_likes_count(driver)
+    wait = Selenium::WebDriver::Wait.new(timeout: 10)
+
+    begin
+      # Wait for the like button to be present
+      like_button = wait.until { driver.find_element(:xpath, "//button[contains(@aria-label, 'like this video')]") }
+  
+      # Extract the aria-label attribute
+      like_aria_label = like_button.attribute("aria-label")
+      puts "Aria Label: #{like_aria_label}" # Debugging line
+  
+      # Adjusted regex pattern to capture the number of likes
+      if like_aria_label && match_data = like_aria_label.match(/(\d{1,3}(?:,\d{3})*)\s+other people/i)
+        like_count = match_data[1].gsub(',', '').to_i # Remove commas and convert to integer
+        puts "Like Count: #{like_count}"
+      else
+        puts "Like Count not found"
+        like_count = 0
+      end
+    rescue Selenium::WebDriver::Error::NoSuchElementError
+      puts "Like button not found"
+      like_count = 0
+    rescue Selenium::WebDriver::Error::TimeoutError
+      puts "Timed out waiting for like button"
+      like_count = 0
+    end
+  
+    like_count
   end
 end
