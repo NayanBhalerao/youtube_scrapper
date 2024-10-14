@@ -32,7 +32,7 @@ class VideoScrapper
                 end
 
     # Extract "days ago" posting pattern
-    days_ago_text = description_full[/(\d+)\s(years?|months?|weeks?|days?)\sago/i]
+    days_ago_text = description_full[/(\d+)\s(years?|months?|weeks?|days?|hours?|minutes?|seconds?)\sago/i]
 
     # date when the vedio is posted
     # Extract the specific posted date in formats like 'Sep 29, 2024'
@@ -50,6 +50,9 @@ class VideoScrapper
     # get likes count
     likes_count = get_likes_count(driver)
 
+    # get the thumbnail URL
+    thumbnail_url = get_thumbnail_url(driver)
+
     # updating to database
     Video.find_or_create_by(url: @video_url) do |video|
       video.title = title
@@ -61,6 +64,7 @@ class VideoScrapper
       video.posted_at = date_posted_text
       video.days_ago = days_ago_text
       video.url = @video_url
+      video.thumbnail_url = thumbnail_url
     end
     
     driver.quit # Close the browser
@@ -81,7 +85,7 @@ class VideoScrapper
     description.gsub!(/Transcript.*?Show transcript.*?(\n|$)/m, '')
     
     # Clean up whitespace
-    description.gsub!(/\s+/, ' ').strip!
+    description = description.gsub(/\s+/, ' ').strip if description
     
     # Extract everything after "Show less" (if present)
     if description =~ /Show less\s+(.*)/m
@@ -178,5 +182,26 @@ class VideoScrapper
     end
   
     like_count
+  end
+
+  # get the thumbnail url
+  def get_thumbnail_url(driver)
+    # Assuming you want to fetch the thumbnail of the current video being played
+    wait = Selenium::WebDriver::Wait.new(timeout: 10)
+    
+    begin
+      # XPath to find the thumbnail image on the video page
+      thumbnail_element = wait.until { driver.find_element(:xpath, "//link[@rel='image_src']") }
+      thumbnail_url = thumbnail_element.attribute("href")
+      puts "Thumbnail URL: #{thumbnail_url}" # Debugging line
+    rescue Selenium::WebDriver::Error::NoSuchElementError
+      puts "Thumbnail not found"
+      thumbnail_url = nil
+    rescue Selenium::WebDriver::Error::TimeoutError
+      puts "Timed out waiting for thumbnail"
+      thumbnail_url = nil
+    end
+
+    thumbnail_url
   end
 end
