@@ -6,8 +6,20 @@ class VideoScrapper
   end
 
   def scrape
-    options = Selenium::WebDriver::Firefox::Options.new(args: ['--headless']) # Headless mode
-    driver = Selenium::WebDriver.for :firefox, options: options
+     # Create a Firefox profile
+    profile = Selenium::WebDriver::Firefox::Profile.new
+
+    # Set Firefox preferences to use AdGuard DNS with DoH
+    profile['network.trr.mode'] = 2 # Enable DoH (TRR mode)
+    profile['network.trr.uri'] = 'https://dns.adguard.com/dns-query' # AdGuard DoH resolver
+
+    # Set up Firefox options and attach the profile
+    options = Selenium::WebDriver::Firefox::Options.new
+    options.profile = profile
+    options.args << '--headless' # Enable headless mode if needed
+
+    # Initialize the Firefox driver with the profile and options
+    driver = Selenium::WebDriver.for(:firefox, options: options)
     driver.get(@video_url)
   
     sleep(3)
@@ -41,9 +53,6 @@ class VideoScrapper
     # vidio description
     description = extract_description(description_full)
 
-    # getting the exact duration of the video
-    duration = extract_duration(driver)
-
     # get comments count
     comments_count = get_comments_count(driver)
 
@@ -52,6 +61,9 @@ class VideoScrapper
 
     # get the thumbnail URL
     thumbnail_url = get_thumbnail_url(driver)
+
+    # getting the exact duration of the video
+    duration = extract_duration(driver)
 
     # updating to database
     Video.find_or_create_by(url: @video_url) do |video|
@@ -104,19 +116,25 @@ class VideoScrapper
   
   # Extract the video duration using Selenium and JavaScript
   def extract_duration(driver)
-    # This JavaScript query fetches the duration of the video by interacting with the YouTube video player
+    # Wait for the video to start (ad might play first)
+    wait = Selenium::WebDriver::Wait.new(timeout: 60)
+
+    # Check if an ad is playing
+    if driver.execute_script("return document.querySelector('.ad-showing')")
+      # Wait for the ad to finish
+      wait.until { driver.execute_script("return !document.querySelector('.ad-showing')") }
+    end
+
+    # Now fetch the video duration
     script = <<-JS
       var video = document.querySelector('video');
       return video ? video.duration : null;
     JS
 
-    # Execute JavaScript to get the video duration
     duration_in_seconds = driver.execute_script(script)
-
-    # If duration is present, convert it to a readable format (e.g., "1:30" or "1:02:15")
     return format_duration(duration_in_seconds) if duration_in_seconds
 
-    nil # Return nil if duration not found
+    nil
   end
 
   # Convert duration in seconds to "HH:MM:SS" format
