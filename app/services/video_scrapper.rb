@@ -116,25 +116,26 @@ class VideoScrapper
   
   # Extract the video duration using Selenium and JavaScript
   def extract_duration(driver)
-    # Wait for the video to start (ad might play first)
-    wait = Selenium::WebDriver::Wait.new(timeout: 60)
+    # Wait for the video element to be present
+    wait = Selenium::WebDriver::Wait.new(timeout: 20)
+    wait.until { driver.execute_script("return document.querySelector('video') !== null") }
 
-    # Check if an ad is playing
-    if driver.execute_script("return document.querySelector('.ad-showing')")
-      # Wait for the ad to finish
-      wait.until { driver.execute_script("return !document.querySelector('.ad-showing')") }
-    end
-
-    # Now fetch the video duration
+    # Fetch the video duration
     script = <<-JS
       var video = document.querySelector('video');
       return video ? video.duration : null;
     JS
 
+    # Execute the JavaScript to get the video duration
     duration_in_seconds = driver.execute_script(script)
-    return format_duration(duration_in_seconds) if duration_in_seconds
 
-    nil
+    # Debug: print the duration to check if it's a number
+    puts "Duration in seconds: #{duration_in_seconds.inspect}"
+
+    # If duration is present, convert it to a readable format (e.g., "1:30" or "1:02:15")
+    return format_duration(duration_in_seconds) if duration_in_seconds.is_a?(Numeric)
+
+    nil # Return nil if duration not found or not a number
   end
 
   # Convert duration in seconds to "HH:MM:SS" format
